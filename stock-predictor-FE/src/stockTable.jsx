@@ -1,14 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
-import {
-  ArrowUpCircle,
-  ArrowDownCircle,
-  Search,
-  DollarSign,
-  TrendingUp,
-  BarChart3,
-} from 'lucide-react';
+import { ArrowUpCircle, ArrowDownCircle, Search, DollarSign, TrendingUp, BarChart3 } from 'lucide-react';
 import { Card } from './card';
 import StockChart from './stockChart';
 
@@ -54,7 +47,8 @@ const StockTable = () => {
     const fetchStocks = async () => {
       try {
         const { data } = await axios.get(`${API_URL}/api/stocks`);
-        // API might return { stocks: [...] } or { data: [...] } or raw array
+        console.log('API fetched stocks raw:', data);
+        // extract array from various possible shapes
         const list = Array.isArray(data)
           ? data
           : Array.isArray(data.stocks)
@@ -62,6 +56,7 @@ const StockTable = () => {
           : Array.isArray(data.data)
           ? data.data
           : [];
+        console.log('→ stocks array:', list);
         setStocks(list);
       } catch (error) {
         console.error('Error fetching stock list:', error);
@@ -76,25 +71,17 @@ const StockTable = () => {
         stock.T.toLowerCase().includes(search.toLowerCase())
       )
     : [];
+  console.log('filteredStocks length:', filteredStocks.length);
 
-  const handleRowClick = async ticker => {
+  const handleRowClick = async (ticker) => {
     try {
-      // Fetch details
-      const detailRes = await axios.get(
-        `${API_URL}/api/stock/${ticker}/details`
-      );
+      const detailRes = await axios.get(`${API_URL}/api/stock/${ticker}/details`);
       setStockDetails(detailRes.data);
 
-      // Fetch price data for chart
-      const chartRes = await axios.get(
-        `${API_URL}/api/stock/${ticker}`
-      );
+      const chartRes = await axios.get(`${API_URL}/api/stock/${ticker}`);
       setSelectedStock(chartRes.data);
 
-      // Fetch predictions
-      const predictRes = await axios.get(
-        `${API_URL}/api/stock/${ticker}/predict`
-      );
+      const predictRes = await axios.get(`${API_URL}/api/stock/${ticker}/predict`);
       setStockPredictions(predictRes.data);
     } catch (error) {
       console.error('Error fetching stock details:', error);
@@ -112,19 +99,12 @@ const StockTable = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 p-8">
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="max-w-7xl mx-auto"
-      >
+      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="max-w-7xl mx-auto">
         <h1 className="text-5xl font-bold text-center text-white mb-8">
           <TypewriterText text="Financial Market Dashboard" />
         </h1>
         <div className="text-center text-gray-300 mb-8">
-          <TypewriterText
-            text="Real-time stock data and market insights"
-            delay={2.5}
-          />
+          <TypewriterText text="Real-time stock data and market insights" delay={2.5} />
         </div>
 
         <Card className="mb-8">
@@ -156,26 +136,29 @@ const StockTable = () => {
           </div>
         </Card>
 
-        <div className="relative mb-8">
+        <div className="relative mb-4">
           <Search className="absolute left-4 top-3 text-gray-400" />
           <input
             type="text"
             placeholder="Search stocks..."
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-300"
           />
         </div>
+
+        {/* Debug: raw JSON dump */}
+        <pre className="text-white text-xs p-2 bg-gray-800 rounded mb-4">
+          {JSON.stringify(stocks, null, 2)}
+        </pre>
 
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
-                  {['Ticker', 'Price', 'Volume', 'Open', 'Close', 'High', 'Low', 'Change'].map(header => (
-                    <th key={header} className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                      {header}
-                    </th>
+                  {['Ticker', 'Price', 'Volume', 'Open', 'Close', 'High', 'Low', 'Change'].map((h) => (
+                    <th key={h} className="px-6 py-4 text-left text-sm font-semibold text-gray-600">{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -206,18 +189,14 @@ const StockTable = () => {
 
         {selectedStock && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mt-8 bg-white p-6 rounded-xl shadow-lg">
-            <h3 className="text-2xl font-bold text-gray-800 mb-4">
-              {selectedStock.ticker} Stock Chart
-            </h3>
+            <h3 className="text-2xl font-bold text-gray-800 mb-4">{selectedStock.ticker} Stock Chart</h3>
             <StockChart stockData={selectedStock.data} />
           </motion.div>
         )}
 
         {stockDetails && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mt-8 bg-white p-6 rounded-xl shadow-lg">
-            <h3 className="text-2xl font-bold text-gray-800 mb-4">
-              {stockDetails.name} ({stockDetails.ticker})
-            </h3>
+            <h3 className="text-2xl font-bold text-gray-800 mb-4">{stockDetails.name} ({stockDetails.ticker})</h3>
             <div className="grid gap-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="p-4 bg-gray-50 rounded-lg">
