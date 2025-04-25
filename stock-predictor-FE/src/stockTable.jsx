@@ -9,6 +9,8 @@ import { Card } from './card';
 // import { Table } from './table';
 import StockChart from './stockChart';
 
+ const API_URL = process.env.REACT_APP_API_URL;
+
 
 const TypewriterText = ({ text, className, delay = 0 }) => {
     const [displayedText, setDisplayedText] = useState('');
@@ -50,7 +52,8 @@ const StockTable = () => {
     useEffect(() => {
         const fetchStocks = async () => {
             try {
-                const response = await axios.get('http://127.0.0.1:5000/api/stocks');
+                // const response = await axios.get('http://127.0.0.1:5000/api/stocks');
+                const response = await axios.get(`${API_URL}/api/stocks`);
                 setStocks(response.data);
 
 
@@ -67,13 +70,16 @@ const StockTable = () => {
 
     const handleRowClick = async (ticker) => {
         try {
-            const detailResponse = await axios.get(`http://127.0.0.1:5000/api/stock/${ticker}/details`);
+            // const detailResponse = await axios.get(`http://127.0.0.1:5000/api/stock/${ticker}/details`);
+            const detailResponse = await axios.get(`${API_URL}/api/stock/${ticker}/details`);
             setStockDetails(detailResponse.data);
 
-            const chartResponse = await axios.get(`http://127.0.0.1:5000/api/stock/${ticker}`);
+            // const chartResponse = await axios.get(`http://127.0.0.1:5000/api/stock/${ticker}`);
+            const chartResponse = await axios.get(`${API_URL}/api/stock/${ticker}`);
             setSelectedStock(chartResponse.data);
             
-            const predictionResponse = await axios.get(`http://127.0.0.1:5000/api/stock/${ticker}/predict`);
+            // const predictionResponse = await axios.get(`http://127.0.0.1:5000/api/stock/${ticker}/predict`);
+            const predictionResponse = await axios.get(`${API_URL}/api/stock/${ticker}/predict`);
             setStockPredictions(predictionResponse.data);
 
         } catch (error) {
